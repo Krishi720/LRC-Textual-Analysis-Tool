@@ -20,9 +20,10 @@
 # Sample Command:
 # python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
 #  --presence-mode density --window 128 \
-# --targets "myth,reason" \
-#  --context-terms “philosophy,literature” --context-topk 10 \
-# --context-maxevals 200 --min-rs 500 --max-sents 10000
+#  --targets "myth,reason" \
+#  --context-terms "history" --context-topk 10 \
+#  --context-maxevals 200 --min-rs 500 --max-sents 10000
+
 # Dependencies:
 #   python -m pip install -U numpy scipy scikit-learn nolds sentence-transformers "torch>=2.3,<3"
 
