@@ -17,11 +17,12 @@
 # - Optional surrogate tests (--surrogates) with ΔH reporting
 # - Weighted aggregation and series length reporting
 #
-# Usage examples:
-#   python the_code.py
-#   python the_code.py --text1 file.txt --targets "the,of,and" --presence-mode density --window 128
-#   python the_code.py --dfa-only --surrogates --weights "1,1,1,0.8,1.2"
-#
+# Sample Command:
+# python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
+#  --presence-mode density --window 128 \
+# --targets "myth,reason" \
+#  --context-terms “philosophy,literature” --context-topk 10 \
+# --context-maxevals 200 --min-rs 500 --max-sents 10000
 # Dependencies:
 #   python -m pip install -U numpy scipy scikit-learn nolds sentence-transformers "torch>=2.3,<3"
 
