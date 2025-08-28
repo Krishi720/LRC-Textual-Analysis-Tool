@@ -38,7 +38,7 @@ import nolds
 
 # ---------------------- Config ----------------------
 MIN_RS_POINTS = 500  # min series length to use RS Hurst; else DFA fallback
-TARGET_WORD_DEFAULT = "was"
+TARGET_WORD_DEFAULT = "Bloom"
 
 FUNCTION_WORDS = {
     "a","an","the","and","or","but","if","then","else","for","nor","so","yet",
