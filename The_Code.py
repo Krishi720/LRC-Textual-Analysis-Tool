@@ -5,7 +5,7 @@
 #   1) Multi-target word presence family: OR / inter-arrival gaps / windowed density
 #   2) Sentence-length series (words per sentence)
 #   3) Function-word indicator series
-#   4) Character-level vowel indicator series
+#   4) Punctuation-cadence (to determine long-range structural rhythm)
 #   5) Semantic drift (embedding-space sentence-to-sentence distance)
 #
 # Enhancements vs original:
@@ -17,13 +17,11 @@
 # - Optional surrogate tests (--surrogates) with ΔH reporting
 # - Weighted aggregation and series length reporting
 #
-# Sample Command:
-# python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
-#  --presence-mode density --window 128 \
-#  --targets "myth,reason" \
-#  --context-terms "history" --context-topk 10 \
-#  --context-maxevals 200 --min-rs 500 --max-sents 10000
-
+# Usage examples:
+#   python the_code.py
+#   python the_code.py --text1 file.txt --targets "the,of,and" --presence-mode density --window 128
+#   python the_code.py --dfa-only --surrogates --weights "1,1,1,0.8,1.2"
+#
 # Dependencies:
 #   python -m pip install -U numpy scipy scikit-learn nolds sentence-transformers "torch>=2.3,<3"
 
@@ -38,7 +36,7 @@ import nolds
 
 # ---------------------- Config ----------------------
 MIN_RS_POINTS = 500  # min series length to use RS Hurst; else DFA fallback
-TARGET_WORD_DEFAULT = "Bloom"
+TARGET_WORD_DEFAULT = "was"
 
 FUNCTION_WORDS = {
     "a","an","the","and","or","but","if","then","else","for","nor","so","yet",
@@ -52,9 +50,8 @@ FUNCTION_WORDS = {
     "not","no","yes","also","very","too","just",
     "there","here","when","where","why","how","though","while","over","under","through","between","against"
 }
-
-VOWELS = set(list("aeiou"))
-
+# Punctuation set for cadence/burstiness (includes . , ; : ! ? quotes, parentheses, ellipsis …, en dash – , em dash — , hyphen -)
+PUNCT_CHARS = set(list(".,;:!?()\"'—–-…"))
 # ------------------- Preprocessing ------------------
 
 def tokenize_words(text: str) -> List[str]:
@@ -129,9 +126,27 @@ def series_sentence_lengths(sentences: List[str]) -> np.ndarray:
 def series_function_word_indicator(words: List[str]) -> np.ndarray:
     return np.array([1.0 if w in FUNCTION_WORDS else 0.0 for w in words], dtype=float)
 
-def series_vowel_indicator_chars(text: str) -> np.ndarray:
-    chars = re.findall(r"[a-z]", text.lower())
-    return np.array([1.0 if c in VOWELS else 0.0 for c in chars], dtype=float)
+def series_punct_counts_per_sentence(text: str, punct_chars: Optional[set] = None) -> np.ndarray:
+    """Count defined punctuation marks per sentence; returns a real-valued series."""
+    if punct_chars is None:
+        punct_chars = PUNCT_CHARS
+    sents = split_sentences(text)
+    counts = []
+    for s in sents:
+        c = sum(1 for ch in s if ch in punct_chars)
+        counts.append(c)
+    return np.array(counts, dtype=float)
+
+def fano_factor(x: np.ndarray) -> float:
+    """Variance-to-mean ratio with guards (0 if mean≈0)."""
+    x = np.asarray(x, dtype=float).ravel()
+    if x.size == 0:
+        return 0.0
+    m = float(np.mean(x))
+    v = float(np.var(x))
+    if m <= 1e-12:
+        return 0.0
+    return v / m
 
 # ------------------ Surrogates ----------------------
 
@@ -244,6 +259,9 @@ class LRCResult:
     encoding_values: Dict[str, EncodingStat]  # encoding -> stats
     aggregate_score: float
     verdict: str
+	# extras (not in weighted aggregate)
+    punc_fano: Optional[float] = None
+    punc_n: Optional[int] = None
 
 def aggregate_verdict(exponents: List[float], weights: Optional[List[float]] = None) -> Tuple[float, str]:
     exps = np.array(exponents, dtype=float)
@@ -256,7 +274,7 @@ def aggregate_verdict(exponents: List[float], weights: Optional[List[float]] = N
     if agg >= 0.56:
         verdict = "More human-like global memory (persistent)."
     elif agg <= 0.50:
-        verdict = "More AI-like or weak global memory (anti-/a-persistent)."
+        verdict = "More AI-like or weak global memory (anti-persistent)."
     else:
         verdict = "Ambiguous / mixed global memory."
     return agg, verdict
@@ -327,11 +345,12 @@ def analyze_text(
         fw, min_rs_points, dfa_only, use_surrogates, 'indicator'
     )
 
-    # 4) Vowel indicator (character-level)
-    vi = series_vowel_indicator_chars(text)
-    encodings["vowel_indicator"] = compute_encoding(
-        vi, min_rs_points, dfa_only, use_surrogates, 'indicator'
+    # 4) Punctuation cadence (per-sentence counts -> DFA/RS) + Fano (burstiness)
+    pc = series_punct_counts_per_sentence(text)
+    encodings["punctuation_cadence"] = compute_encoding(
+        pc, min_rs_points, dfa_only, use_surrogates, 'real'
     )
+    punc_fano_val = fano_factor(pc)
 
     # 5) Semantic drift between adjacent sentences
     sd = series_semantic_drift(sentences, max_sents=max_sents)
@@ -340,10 +359,17 @@ def analyze_text(
     )
 
     # Aggregation (respect presence encoding first)
-    order = [presence_name, "sentence_lengths", "function_words", "vowel_indicator", "semantic_drift"]
+    order = [presence_name, "sentence_lengths", "function_words", "punctuation_cadence", "semantic_drift"]
     exps = [encodings[name].value for name in order]
     agg, verdict = aggregate_verdict(exps)
-    return LRCResult(encoding_values=encodings, aggregate_score=agg, verdict=verdict)
+
+    return LRCResult(
+        encoding_values=encodings,
+        aggregate_score=agg,
+        verdict=verdict,
+        punc_fano=punc_fano_val,
+        punc_n=int(len(pc))
+    )
 
 def compare_texts(
     text1: str, text2: str,
@@ -376,9 +402,14 @@ def compare_texts(
                 line += f"  ΔH={stats.delta:+.3f} (sur={stats.surrogate:.3f})"
             print(line)
 
+ # Punctuation burstiness (Fano) — extra, not in weighted aggregate
+        if getattr(res, "punc_fano", None) is not None:
+            n_punc = res.encoding_values.get("punctuation_cadence", EncodingStat(0,"",0)).n
+            print(f"{'punctuation_fano':24s}: {res.punc_fano:.3f}  (n={n_punc})")
+
         # aggregate (weighted if provided)
         presence_keys = [k for k in res.encoding_values.keys() if k.startswith("word_")]
-        agg_order = presence_keys + ["sentence_lengths", "function_words", "vowel_indicator", "semantic_drift"]
+        agg_order = presence_keys + ["sentence_lengths", "function_words", "punctuation_cadence", "semantic_drift"]
         exps = [res.encoding_values[k].value for k in agg_order if k in res.encoding_values]
         if weights_opt is not None and len(weights_opt) == len(exps):
             w = np.array(weights_opt, dtype=float)
@@ -501,7 +532,7 @@ def main():
     parser.add_argument("--min-rs", type=int, default=MIN_RS_POINTS, help="Minimum series length to use RS Hurst")
     parser.add_argument("--dfa-only", action="store_true", help="Force DFA for all encodings")
     parser.add_argument("--surrogates", action="store_true", help="Compute surrogate ΔH for each encoding")
-    parser.add_argument("--weights", type=str, help="Comma-separated weights for encodings (presence, sentlen, func, vowel, drift)")
+    parser.add_argument("--weights", type=str, help="Comma-separated weights (presence, sentlen, func, punct, drift)")
     parser.add_argument("--max-sents", type=int, default=5000, help="Cap on sentences for semantic drift")
     args = parser.parse_args()
 
@@ -545,7 +576,6 @@ def main():
             use_surrogates=args.surrogates,
             weights=weights,
             max_sents=args.max_sents,
-            # pass context args so compare_texts prints labeled Context Fit for both texts
             context_terms=args.context_terms,
             context_topk=args.context_topk,
             context_maxevals=args.context_maxevals,
@@ -570,6 +600,9 @@ def main():
             if getattr(stats, "delta", None) is not None and getattr(stats, "surrogate", None) is not None:
                 line += f"  ΔH={stats.delta:+.3f} (sur={stats.surrogate:.3f})"
             print(line)
+        if getattr(res, "punc_fano", None) is not None:
+            n_punc = res.encoding_values.get("punctuation_cadence", EncodingStat(0,"",0)).n
+            print(f"{'punctuation_fano':24s}: {res.punc_fano:.3f}  (n={n_punc})")
         print(f"Aggregate (mean): {res.aggregate_score:.3f}")
         print(f"Verdict: {res.verdict}")
 
@@ -598,7 +631,6 @@ def main():
             use_surrogates=args.surrogates,
             weights=weights,
             max_sents=args.max_sents,
-            # context args included here too
             context_terms=args.context_terms,
             context_topk=args.context_topk,
             context_maxevals=args.context_maxevals,
