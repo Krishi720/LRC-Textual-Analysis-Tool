@@ -5,7 +5,7 @@
 #   1) Multi-target word presence family: OR / inter-arrival gaps / windowed density
 #   2) Sentence-length series (words per sentence)
 #   3) Function-word indicator series
-#   4) Character-level vowel indicator series
+#   4) Punctuation-cadence (to determine long-range structural rhythm)
 #   5) Semantic drift (embedding-space sentence-to-sentence distance)
 #
 # Enhancements vs original:
