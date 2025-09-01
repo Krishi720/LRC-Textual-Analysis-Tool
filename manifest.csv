@@ -1,0 +1,4 @@
+domain,text1,text2,label1,label2
+cybersecurity,AI_Cybersecurity_Human_Sample.txt,AI_Cybersecurity_GPT_Sample.txt,human,ai
+chokepoints,Chokepoints_Human_Sample.txt,Chokepoints_GPT_Sample.txt,human,ai
+joyce,Joyce_Human_Sample_text.txt,Joyce_GPT_Sample_text.txt,human,ai
