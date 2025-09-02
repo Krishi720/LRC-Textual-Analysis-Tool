@@ -1,0 +1,40 @@
+{
+  "feat_names": [
+    "sentence_lengths",
+    "punctuation_cadence",
+    "semantic_drift",
+    "function_words",
+    "punctuation_fano"
+  ],
+  "scaler_mean": [
+    -0.03544391900496071,
+    0.019551348686087277,
+    0.04417189984290173,
+    0.001524768823369882,
+    1.7087347362965613
+  ],
+  "scaler_scale": [
+    0.04743503774998757,
+    0.06354158424891486,
+    0.12009442721698746,
+    0.019997408149501825,
+    0.6094419357443983
+  ],
+  "global_threshold": Infinity,
+  "buckets": {
+    "genre=chokepoints": null,
+    "genre=cybersecurity": null,
+    "genre=joyce": null,
+    "lenbin=long": null,
+    "lenbin=medium": null
+  },
+  "use_surrogates": true,
+  "dfa_only": true,
+  "presence_mode": "gap",
+  "targets": null,
+  "window": 128,
+  "min_rs_points": 500,
+  "max_sents": 5000,
+  "include_presence": false,
+  "prefer_delta": true
+}

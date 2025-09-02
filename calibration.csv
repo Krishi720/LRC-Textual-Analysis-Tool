@@ -1,0 +1,7 @@
+path,label,genre
+AI_Cybersecurity_Human_Sample.txt,human,cybersecurity
+AI_Cybersecurity_GPT_Sample.txt,ai,cybersecurity
+Chokepoints_Human_Sample.txt,human,chokepoints
+Chokepoints_GPT_Sample.txt,ai,chokepoints
+Joyce_Human_Sample_text.txt,human,joyce
+Joyce_GPT_Sample_text.txt,ai,joyce
