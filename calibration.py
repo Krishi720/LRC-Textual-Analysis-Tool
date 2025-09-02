@@ -74,36 +74,60 @@ def _length_bin(n_sents: int) -> str:
 
 # ---------------- Data loading ----------------
 
+# ---------------- Data loading ----------------
+
+import os, csv
+from typing import List, Dict
+
 def load_rows_from_manifest(manifest_path: str) -> List[Dict[str, str]]:
-    """Read domain,text1,text2,label1,label2 → rows of {path,label,genre}."""
+    """
+    Read domain,text1,text2,label1,label2 and return rows of {path,label,genre},
+    resolving text paths relative to the manifest's directory.
+    """
+    base = os.path.dirname(os.path.abspath(manifest_path))
     rows: List[Dict[str, str]] = []
+
     with open(manifest_path, newline="", encoding="utf-8") as f:
-        r = csv.DictReader(f)
+        reader = csv.DictReader(f)
+
+        # Validate header (case-sensitive; adjust if your header differs)
         required = {"domain", "text1", "text2", "label1", "label2"}
-        if not required.issubset(set(r.fieldnames or [])):
-            raise ValueError(
-                f"manifest must have columns: {sorted(required)}; found {r.fieldnames}"
-            )
-        for row in r:
+        if not required.issubset(set(reader.fieldnames or [])):
+            raise ValueError(f"manifest must have columns: {sorted(required)}; found {reader.fieldnames}")
+
+        for row in reader:
             domain = (row.get("domain") or "generic").strip()
-            t1, t2 = row["text1"].strip(), row["text2"].strip()
-            l1, l2 = row["label1"].strip().lower(), row["label2"].strip().lower()
-            rows.append({"path": t1, "label": l1, "genre": domain})
-            rows.append({"path": t2, "label": l2, "genre": domain})
+
+            # Join relative paths to the manifest directory
+            t1 = row["text1"].strip()
+            t2 = row["text2"].strip()
+            p1 = t1 if os.path.isabs(t1) else os.path.normpath(os.path.join(base, t1))
+            p2 = t2 if os.path.isabs(t2) else os.path.normpath(os.path.join(base, t2))
+
+            l1 = row["label1"].strip().lower()
+            l2 = row["label2"].strip().lower()
+
+            rows.append({"path": p1, "label": l1, "genre": domain})
+            rows.append({"path": p2, "label": l2, "genre": domain})
+
     return rows
 
 
 def load_rows_from_calib_csv(csv_path: str) -> List[Dict[str, str]]:
-    """Read path,label,genre rows."""
+    """Read path,label[,genre] rows; resolve paths relative to the CSV file."""
+    base = os.path.dirname(os.path.abspath(csv_path))
     df = pd.read_csv(csv_path)
     need = {"path", "label"}
     if not need.issubset(df.columns):
         raise ValueError(f"calibration csv must have at least columns {sorted(need)}")
     if "genre" not in df.columns:
         df["genre"] = "generic"
+
     out: List[Dict[str, str]] = []
     for _, r in df.iterrows():
-        out.append({"path": str(r["path"]), "label": str(r["label"]).lower(), "genre": str(r["genre"])})
+        p = str(r["path"]).strip()
+        p = p if os.path.isabs(p) else os.path.normpath(os.path.join(base, p))
+        out.append({"path": p, "label": str(r["label"]).lower(), "genre": str(r["genre"])})
     return out
 
 

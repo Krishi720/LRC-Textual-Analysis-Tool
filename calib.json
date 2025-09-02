@@ -7,26 +7,30 @@
     "punctuation_fano"
   ],
   "scaler_mean": [
-    -0.03544391900496071,
-    0.019551348686087277,
-    0.04417189984290173,
-    0.001524768823369882,
-    1.7087347362965613
+    0.5,
+    0.5,
+    0.5,
+    0.020730702644555853,
+    0.29259259259259257
   ],
   "scaler_scale": [
-    0.04743503774998757,
-    0.06354158424891486,
-    0.12009442721698746,
-    0.019997408149501825,
-    0.6094419357443983
+    1.0,
+    1.0,
+    1.0,
+    0.04635526033456154,
+    0.15994683616066063
   ],
-  "global_threshold": Infinity,
+  "global_threshold": 0.595039211974296,
   "buckets": {
     "genre=chokepoints": null,
     "genre=cybersecurity": null,
     "genre=joyce": null,
-    "lenbin=long": null,
-    "lenbin=medium": null
+    "lenbin=short": {
+      "n": 6,
+      "roc_auc": 0.7777777777777778,
+      "pr_auc": 0.8666666666666667,
+      "threshold": 0.595039211974296
+    }
   },
   "use_surrogates": true,
   "dfa_only": true,
