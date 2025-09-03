@@ -1,0 +1,22 @@
+Sample Commands:
+
+For texts written on Chokepoints:
+
+python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
+  --presence-mode gap --window 128 \
+  --targets "choke,chokepoint,chokepoints" \
+  --context-terms "social" --context-topk 20 \
+  --context-maxevals 200 --min-rs 500 --max-sents 10000
+
+For texts written on Joyce, Myth and Reason
+python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
+  --presence-mode density --window 128 \
+  --targets "myth,reason" \
+  --context-terms "Vico,Nietzsche,modern" --context-topk 20 \
+  --context-maxevals 200 --min-rs 500 --max-sents 10000
+
+# You can replace "gap" with "density" and vice-versa. Gap measures the spacing of target words, while density measures their clustering.
+# Target words are tokens you choose to track; they drive the presence/gap/density time series. You can also use a combination of neutral words like "the,and,was" to avoid topic leakage.
+# Context-fit returns the Masked-LM score (0–1) of how well the given word is predicted by its sentence context; higher = more expected/idiomatic usage.
+# Think of the context within which the keywords operate, and use those indicators (like "social", "modern") to measure context-fit.
+
