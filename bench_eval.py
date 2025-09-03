@@ -1,6 +1,9 @@
 # bench_eval.py
 import argparse, csv, os, sys
 import numpy as np
+# top imports
+import json, joblib
+from calibration import _result_to_features  # reuse same feature order
 
 # Assumes The_Code.py is in the same directory or on PYTHONPATH
 try:
@@ -49,6 +52,8 @@ def metrics(tp, fp, fn, tn):
 
 def main():
     ap = argparse.ArgumentParser(description="Benchmark & confusion-style summary for The_Code")
+    ap.add_argument("--calib-json", type=str, help="Path to calib.json (loads threshold & analyzer settings)")
+    ap.add_argument("--model", type=str, help="Path to model.joblib for probability scoring")
     ap.add_argument("manifest", help="CSV with columns: path,label,domain")
     ap.add_argument("--threshold", type=float, default=0.56,
                     help="Aggregate threshold: >=T => predict human-like (positive)")
@@ -61,6 +66,44 @@ def main():
                     help="Optional targets list, e.g. 'myth,reason'")
     ap.add_argument("--max-sents", type=int, default=5000)
     args = ap.parse_args()
+    args = ap.parse_args()
+    _autodiscover_calib_and_model(args)
+
+
+import os
+
+def _autodiscover_calib_and_model(args):
+    # If user provided an existing calib.json, keep it and try sibling model
+    if getattr(args, "calib_json", None) and os.path.isfile(args.calib_json):
+        maybe_model = os.path.join(os.path.dirname(args.calib_json), "model.joblib")
+        if not getattr(args, "model", None) and os.path.isfile(maybe_model):
+            args.model = maybe_model
+        print(f"[auto] Using calib_json: {args.calib_json}")
+        if getattr(args, "model", None):
+            print(f"[auto] Using model: {args.model}")
+        return
+
+    # Search common places
+    cands = []
+    for base in (".", "reports"):
+        for root, _, files in os.walk(base):
+            if "calib.json" in files:
+                cands.append(os.path.join(root, "calib.json"))
+
+    if len(cands) == 1:
+        args.calib_json = cands[0]
+        print(f"[auto] Using calib_json: {args.calib_json}")
+        maybe_model = os.path.join(os.path.dirname(args.calib_json), "model.joblib")
+        if not getattr(args, "model", None) and os.path.isfile(maybe_model):
+            args.model = maybe_model
+            print(f"[auto] Using model: {args.model}")
+    elif len(cands) > 1:
+        print("[auto] Multiple calib.json found:")
+        for c in cands:
+            print("  -", c)
+        print("[auto] Pass --calib-json <path> to choose one.")
+    else:
+        print("[auto] No calib.json found. Run calibration to create one.")
 
     rows=[]
     with open(args.manifest, newline="", encoding="utf-8") as f:
