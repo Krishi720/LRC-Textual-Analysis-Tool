@@ -74,7 +74,7 @@ def main():
     for r in rows:
         path = r["path"].strip()
         lab  = r["label"].strip().lower()  # "human" or "ai"
-        dom  = (r.get("domain") or "general").strip().lower()
+        dom  = (r.get("domain") or r.get("genre") or "general").strip().lower()
         if not os.path.exists(path):
             print(f"WARNING: missing file {path}; skipping")
             continue
