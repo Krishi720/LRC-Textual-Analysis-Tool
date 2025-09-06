@@ -363,7 +363,7 @@ def analyze_text(
     exps = [encodings[name].value for name in order]
     agg, verdict = aggregate_verdict(exps)
 
-        return LRCResult(
+    return LRCResult(
         encoding_values=encodings,
         aggregate_score=agg,
         verdict=verdict,
