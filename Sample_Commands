@@ -8,7 +8,8 @@ python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
   --context-terms "social" --context-topk 20 \
   --context-maxevals 200 --min-rs 500 --max-sents 10000
 
-For texts written on Joyce, Myth and Reason
+For texts written on Joyce, Myth and Reason:
+
 python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
   --presence-mode density --window 128 \
   --targets "myth,reason" \
