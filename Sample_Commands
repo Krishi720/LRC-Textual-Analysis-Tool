@@ -20,3 +20,9 @@ python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
 # Context-fit returns the Masked-LM score (0–1) of how well the given word is predicted by its sentence context; higher = more expected/idiomatic usage.
 # Think of the context within which the keywords operate, and use those indicators (like "social", "modern") to measure context-fit.
 
+
+Run in bash:
+python bench_eval.py calibration.csv \
+  --calib-json reports/2025-09-02/calib.json \
+  --model reports/2025-09-02/model.joblib \
+  --dfa-only --surrogates
