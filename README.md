@@ -12,12 +12,15 @@ Having said that, I strongly advise against looking at numbers alone. They only 
 	Of course, there are many limitations. I approached this from a purely research-based methodology. For example, factoring in the weird em-dashes (––) that GPTs commonly use would perhaps make for a stronger signal than punctuation_Fano_factor, but at the moment I haven’t been able to come up with a way to capture those because I am not sure if the code itself would read the em-dashes as one or two long dashes. Another limitation is that it can only work for texts longer than 2.5k words (on average, about 100 sentences).
 
 METHODOLOGY
+
 The core approach treats text as a time-series signal where structural patterns can be mathematically quantified. Drawing from complexity science and fractal analysis, the tool measures long-range correlations (LRC) within texts using the Hurst exponent and Detrended Fluctuation Analysis (DFA). These methods, traditionally used in physics and finance to detect memory effects in complex systems, reveal whether patterns in text persist over long distances or quickly decay into randomness.
 
 Mathematical Foundation
+
 When we encode text into numerical series—whether tracking word occurrences, sentence lengths, or semantic distances—we create a signal that can be analyzed for self-similarity across scales. A Hurst exponent above 0.5 indicates persistence (patterns tend to continue), while values below 0.5 suggest anti-persistence (patterns tend to reverse). Human writing, with its unconscious thematic returns and cognitive constraints, theoretically produces different correlation patterns than machine-generated text, which optimizes locally without genuine long-term memory.
 
 The Five Encoding Constraints
+
 Each constraint captures a different aspect of textual structure:
 1. Word Presence (Density/Gap) Tracks the occurrence patterns of specific target words throughout the text. The tool offers three modes:
 •	OR mode: Binary presence (1 if target word appears, 0 otherwise)
@@ -30,6 +33,7 @@ This reveals how consistently key terms are distributed—humans tend to cluster
 5. Semantic Drift Measures the cosine distance between consecutive sentence embeddings using a pre-trained transformer model (all-MiniLM-L6-v2). This captures how ideas flow and evolve—humans tend to circle back to themes with variations, while AI might drift more uniformly or maintain artificial consistency.
 
 Analysis Pipeline
+
 For each encoding:
 1.	Convert the text aspect into a numerical series
 2.	Apply Hurst RS analysis (for series ≥500 points) or DFA (for shorter series or as fallback)
@@ -39,6 +43,7 @@ Context-Fit Assessment (Experimental)
 An additional layer uses masked language modeling (RoBERTa) to evaluate whether specific words appear in expected contexts. For each occurrence of target terms, the tool masks the word and checks if the model would predict it from context. High scores indicate formulaic, predictable usage; low scores suggest creative or unexpected usage; balanced scores often indicate natural human writing.
 
 Interpretation Framework
+
 •	Aggregate score ≥ 0.56: Strong global memory, human-like persistence
 •	Aggregate score ≤ 0.50: Weak memory, anti-persistent or mixed patterns
 •	0.50 < score < 0.56: Ambiguous, requiring additional analysis
@@ -52,7 +57,6 @@ The tool employs several safeguards for robust analysis:
 •	Proper handling of edge cases in sentence splitting (quotes, ellipses, unconventional punctuation)
 
 Limitations and Considerations
+
 This approach requires sufficient text length (minimum ~2,500 words) to generate reliable statistics. The patterns measured are statistical tendencies, not deterministic markers—excellent human writing might show weak persistence in experimental styles, while sophisticated AI might mimic human patterns. The tool is best used as one perspective among many, complementing rather than replacing close reading and contextual analysis.
 The mathematical patterns revealed should be understood as structural signatures rather than quality judgments. They reflect how information is organized across distance in text, offering insights into the underlying production process—whether emerging from human cognitive constraints or machine optimization patterns.
-
-![Uploading image.png…]()
