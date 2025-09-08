@@ -17,7 +17,7 @@ The core approach treats text as a time-series signal where structural patterns 
 
 Mathematical Foundation
 
-When we encode text into numerical series—whether tracking word occurrences, sentence lengths, or semantic distances—we create a signal that can be analyzed for self-similarity across scales. A Hurst exponent above 0.5 indicates persistence (patterns tend to continue), while values below 0.5 suggest anti-persistence (patterns tend to reverse). Human writing, with its unconscious thematic returns and cognitive constraints, theoretically produces different correlation patterns than machine-generated text, which optimizes locally without genuine long-term memory.
+When we encode text into numerical series– whether tracking word occurrences, sentence lengths, or semantic distances– we create a signal that can be analyzed for self-similarity across scales. A Hurst exponent above 0.5 indicates persistence (patterns tend to continue), while values below 0.5 suggest anti-persistence (patterns tend to reverse). Human writing, with its unconscious thematic returns and cognitive constraints, theoretically produces different correlation patterns than machine-generated text, which optimizes locally without genuine long-term memory.
 
 The Five Encoding Constraints
 
