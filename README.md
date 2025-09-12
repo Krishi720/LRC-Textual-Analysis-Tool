@@ -17,6 +17,16 @@ Having said that, I strongly advise against looking at numbers alone. They only 
 
 The core approach treats text as a time-series signal where structural patterns can be mathematically quantified. Drawing from complexity science and fractal analysis, the tool measures long-range correlations (LRC) within texts using the Hurst exponent and Detrended Fluctuation Analysis (DFA). These methods, traditionally used in physics and finance to detect memory effects in complex systems, reveal whether patterns in text persist over long distances or quickly decay into randomness.
 
+By default, the code has two essays on James Joyce addressing the same topic in the same style. To have a crack at the code, use these sample commands:
+
+python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
+  --presence-mode density --window 128 \
+  --targets "that,which,this,these" \
+  --context-terms "Vico,Nietzsche,modern,rational,rationality,science,history" --context-topk 20 \
+  --context-maxevals 200 --min-rs 500 --max-sents 10000
+
+You will find other sample texts saved as .txt files, and sample commands in the Sample_Commands file.
+
 **Mathematical Foundation**
 
 When we encode text into numerical series– whether tracking word occurrences, sentence lengths, or semantic distances– we create a signal that can be analysed for self-similarity across scales. A Hurst exponent above 0.5 indicates persistence (patterns tend to continue), while values below 0.5 suggest anti-persistence (patterns tend to reverse). Human writing, with its more , theoretically produces different correlation patterns than machine-generated text, which optimises locally without genuine long-term memory.
