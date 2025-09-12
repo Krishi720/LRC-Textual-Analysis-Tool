@@ -12,8 +12,8 @@ For texts written on Joyce, Myth and Reason:
 
 python The_Code.py --text1 HUMAN_TEXT --text2 GPT_TEXT --dfa-only --surrogates \
   --presence-mode density --window 128 \
-  --targets "myth,reason" \
-  --context-terms "Vico,Nietzsche,modern" --context-topk 20 \
+  --targets "that,which,this,these" \
+  --context-terms "Vico,Nietzsche,modern,rational,rationality,science,history" --context-topk 20 \
   --context-maxevals 200 --min-rs 500 --max-sents 10000
 
 # You can replace "gap" with "density" and vice-versa. Gap measures the spacing of target words, while density measures their clustering.
@@ -27,3 +27,5 @@ python bench_eval.py calibration.csv \
   --calib-json reports/2025-09-02/calib.json \
   --model reports/2025-09-02/model.joblib \
   --dfa-only --surrogates
+
+# Humaniser prompts' performance against the tool
