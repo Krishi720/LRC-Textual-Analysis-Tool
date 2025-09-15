@@ -1,3 +1,5 @@
+# Long-Range Correlations Text Analysis Tool
+
 **OBJECTIVE** (and a bit of context)
 
 I built this project out of curiosity. Since GPT-generated content has become increasingly popular, I have always wondered how one can tell apart between content written by a human vs an LLM objectively. I do not intend to say one is better than the other, instead ask what makes human content more valuable. In terms of structure, there exist patterns which have allowed me to approach the idea from a mathematical standpoint. The tool I have built captures long-range correlations across the structure of a given text. I presently use five constraints, weighing their values together and determining whether a particular text exhibits more human-like persistence in structure or has mixed or anti-persistence (too much noise in the signal). These constraints are:
